@@ -1,0 +1,25 @@
+---
+title: "Resolución"
+author: "Laura Mayorgas del Castillo"
+date: "2024-10-10"
+output: "pdf_document"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# problema 2.4
+
+```{r}
+source("teoriadecision_funciones_multicriterio.R")
+source("teoriadecision_funciones_multicriterio_diagram.R")
+```
+
+## Usando método AHP
+
+```{r}
+
+
+```
+
