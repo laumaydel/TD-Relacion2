@@ -1,25 +1,83 @@
 ---
-title: "Resolución"
+title: "Resolucion"
 author: "Laura Mayorgas del Castillo"
-date: "2024-10-10"
-output: "pdf_document"
+date: "2024-10-17"
+output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE,warning = FALSE)
 ```
 
-# problema 2.4
 
 ```{r}
 source("teoriadecision_funciones_multicriterio.R")
-source("teoriadecision_funciones_multicriterio_diagram.R")
 ```
 
-## Usando método AHP
+## PROBLEMA 4
+
+**Resolución con AHP**
+```{r}
+library(ahp)
+datos= Load("datos24.ahp")
+Calculate(datos)
+Visualize(datos)
+```
 
 ```{r}
+export_formattable(AnalyzeTable(datos),file = "table01.png")
+```
 
+```{r}
+export_formattable(AnalyzeTable(datos,variable = "priority"),file = "table02.png")
+```
+
+**Resolución con funciones**
+
+```{r}
+source("teoriadecision_funciones_multicriterio_diagram.R")
+tb01= multicriterio.crea.matrizvaloraciones_mej(c(2),numalternativas = 2)
+tb02a= multicriterio.crea.matrizvaloraciones_mej(c(3),numalternativas = 2)
+tb02b= multicriterio.crea.matrizvaloraciones_mej(c(1/2),numalternativas = 2)
+
+#Calcular los pesos
+peson01= multicriterio.metodoAHP.variante1.autovectormayorautovalor(tb01)
+#En $valoraciones.ahp se encuentran los pesos
+peson02a= multicriterio.metodoAHP.variante1.autovectormayorautovalor(tb02a)
+peson02b= multicriterio.metodoAHP.variante1.autovectormayorautovalor(tb02b)
+sol=multicriterio.metodoAHP.pesosglobales_entabla(peson01$valoraciones.ahp,
+                                              rbind(peson02a$valoraciones.ahp,
+                                                    peson02b$valoraciones.ahp))
+knitr::kable(sol)
 
 ```
+
+**Con el diagrama**
+
+```{r}
+Xmatriznivel2= array(NA, dim= c(2,2,2))
+Xmatriznivel2[,,1]=tb02a
+Xmatriznivel2[,,2]=tb02b
+
+multicriterio.metodoahp.diagrama(tb01,Xmatriznivel2)
+```
+
+**Con la media geometrica**
+
+```{r}
+#Calcular los pesos
+peson012= multicriterio.metodoAHP.variante2.mediageometrica(tb01)
+#En $valoraciones.ahp se encuentran los pesos
+peson022a= multicriterio.metodoAHP.variante2.mediageometrica(tb02a)
+peson022b= multicriterio.metodoAHP.variante2.mediageometrica(tb02b)
+sol2=multicriterio.metodoAHP.pesosglobales_entabla(peson012$valoraciones.ahp,
+                                              rbind(peson022a$valoraciones.ahp,
+                                                    peson022b$valoraciones.ahp))
+knitr::kable(sol2)
+```
+
+\newpage
+
+
+
 

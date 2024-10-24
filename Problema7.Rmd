@@ -1,0 +1,156 @@
+---
+title: "Problema7"
+author: "Laura Mayorgas del Castillo"
+date: "2024-10-17"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```{r, include=FALSE}
+options(tinytex.verbose = TRUE)
+```
+
+
+## PROBLEMA 7
+
+### ELECTRE
+Una primera observación es que los pesos no suman 1, no es necesario ya que el algoritmo de **ELECTRE** no le afecta.
+
+No están en la misma unidad de medida --> Si es necesario normalizarlo usar los métodos de normalización. 
+
+```{r}
+source("teoriadecision_funciones_multicriterio_utiles.R")
+source("teoriadecision_funciones_multicriterio.R")
+```
+
+Al crear la tabla vemos que como el criterio 5 es minimizar lo añadimos con signo negativo.
+```{r}
+p7=multicriterio.crea.matrizdecision(
+  c(100,15,7,40,-50,
+    200,25,7,60,-200,
+    100,20,4,25,-25,
+    200,30,20,70,-350,
+    250,25,15,100,-500),
+    numalternativas=5, numcriterios=5)
+
+knitr:: kable(p7) 
+```
+
+**Iteración 1:**
+```{r}
+sal7= multicriterio.metodoELECTRE_I(p7,
+     pesos.criterios =c(0.25,0.25,0.2,0.2,0.2),
+     nivel.concordancia.minimo.alpha = 0.7,
+     no.se.compensan = c(60,Inf,4,Inf,Inf),
+     que.alternativas = TRUE)
+
+qgraph::qgraph(sal7$relacion.dominante)
+
+sal7$nucleo_aprox #Alternativas con las que nos quedamos
+```
+
+**Iteración 2**
+
+Solo para quedarnos con una alternativa óptima. Ir resudiendo poco a poco el nivel de alfa. 
+```{r}
+sal72= multicriterio.metodoELECTRE_I(p7,
+     pesos.criterios =c(0.25,0.25,0.2,0.2,0.2),
+     nivel.concordancia.minimo.alpha = 0.55, #Ir iterando
+     no.se.compensan = c(60,Inf,4,Inf,Inf),
+     que.alternativas = c(4,5)) # Las que nos indicaban antes
+
+qgraph::qgraph(sal72$relacion.dominante)
+sal72$nucleo_aprox #  Nos quedamos con la mejor alternativa
+```
+
+### PROMETHEE
+
+Vemos una primer observación que es que los pesos no suman 1. 
+
+- **Funciones de preferencias del método Promethee** : Usamos el *fpref.criterio_usual_di(di)* ya que no tenemos los datos de los parámetros.
+
+
+
+#### PROMETHEE I
+
+```{r}
+pesos.criterio=c(0.25/1.1,0.25/1.1,0.2/1.1,0.2/1.1,0.2/1.1)
+tab.fpref =matrix(c(1,0,0,0,
+                    1,0,0,0,
+                    1,0,0,0,
+                    1,0,0,0,
+                    1,0,0,0),ncol=4,byrow=T);
+
+tab.fpref
+```
+
+```{r}
+tab.Pthee.i = multicriterio.metodo.promethee_i(p7,pesos.criterio, tab.fpref)
+tab.Pthee.i
+```
+
+```{r}
+require("qgraph")
+qgraph(tab.Pthee.i$tablarelacionsupera)
+```
+
+
+#### PROMETHEE II
+
+```{r}
+tab.Pthee.ii= multicriterio.metodo.promethee_ii(p7,pesos.criterio,tab.fpref)
+tab.Pthee.ii
+```
+```{r}
+qgraph(tab.Pthee.ii$tablarelacionsupera)
+```
+
+```{r}
+order(tab.Pthee.ii$vflujos.netos,decreasing = T)
+```
+
+###### PROMETHEE I (Medias)
+
+```{r}
+tab.Pthee.i_med = multicriterio.metodo.promethee_i_med(p7,pesos.criterio,tab.fpref)
+tab.Pthee.i_med
+```
+```{r}
+qgraph(tab.Pthee.i_med$tablarelacionsupera)
+```
+
+
+
+
+###### PROMETHEE II (Medias)
+
+```{r}
+tab.Pthee.ii_med = multicriterio.metodo.promethee_ii_med(p7,pesos.criterio,tab.fpref)
+tab.Pthee.ii_med
+```
+```{r}
+qgraph(tab.Pthee.ii_med$tablarelacionsupera)
+```
+
+```{r}
+order(tab.Pthee.ii_med$vflujos.netos,decreasing = T)
+```
+
+
+##### PROMETHEE WINDOWS
+
+```{r}
+res = multicriterio.metodo.promethee_windows(p7,tab.fpref, pesos.criterio,
+                                             fminmax = c("max","max","max","max","min"))
+res02 = multicriterio.metodo.promethee_windows_kableExtra(res)
+res02$tabEscenario
+
+```
+
+```{r}
+rownames(res$Acciones)
+```
+
